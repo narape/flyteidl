@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package flyteidl.admin;
+option go_package = "github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin";
+
+import "flyteidl/core/compiler.proto";
+import "flyteidl/core/identifier.proto";
+
+import "flyteidl/event/event.proto";
+import "flyteidl/core/literals.proto";
+
+
+message WorkflowExecutionContext {
+    core.WorkflowExecutionIdentifier id = 1;
+    //https://github.com/lyft/flyteidl/blob/f39445c0be5906b79bab9d9aa2e1ba956ee13c51/protos/flyteidl/admin/execution.proto#L210
+    core.Identifier launch_plan        = 2;
+    //https://github.com/lyft/flyteidl/blob/f39445c0be5906b79bab9d9aa2e1ba956ee13c51/protosflyteidl/admin/execution.proto#L120
+    core.LiteralMap computed_inputs = 3;
+    //https://github.com/lyft/flyteidl/blob/f39445c0be5906b79bab9d9aa2e1ba956ee13c51/protos/flyteidl/admin/execution.proto#L191
+    core.NodeExecutionIdentifier parent_node_execution = 4;
+
+    meta;  // for workflow metadat
+
+    core.ConnectionSet connectionSet = 5; // optionally
+
+}
+
+message NodeExecutionContext {
+    repeated string upstreams = 3;
+}
+
+message ContextualTaskExecutionEvent {
+    event.TaskExecutionEvent event = 1;
+
+    WorkflowExecutionContext workflowExecutionContext = 2;
+
+    NodeExecutionContext nodeExecutionContext = 3;
+
+    meta ; // for task metadata
+
+
+}
