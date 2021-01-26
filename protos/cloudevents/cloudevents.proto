@@ -1,0 +1,72 @@
+/**
+ * CloudEvent Protobuf Format
+ *
+ * - Required context attributes are explicity represented.
+ * - Optional and Extension context attributes are carried in a map structure.
+ * - Data may be represented as binary, text, or protobuf messages.
+ */
+
+syntax = "proto3";
+
+package io.cloudevents.v1;
+
+import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_package = "io.cloudevents.v1.proto";
+option java_multiple_files = true;
+
+message CloudEvent {
+
+    // -- CloudEvent Context Attributes
+
+    // Required Attributes
+    // Flyte admin will need to generate one as propeller does not emit one.
+    // UUID will be OK
+    string id = 1;
+    // URI-reference to the flyteadmin that generated the event
+    // E.g. urn://flyteadmin.services.gew1.spotify.net
+    string source = 2;
+    string spec_version = 3; // Exactly "1.0"
+
+    // The recommendation is to have versioned reverse dns of types. So:
+    // * org.flyte.workflow.v1
+    // * org.flyte.node.v1
+    // * org.flyte.task.v1
+    string type = 4;
+
+    // Optional & Extension Attributes
+    // Add the following optional attributes:
+    //  * time: event's timestamp. Propagate the occurred_at from propeller event
+    //  * datacontenttype: "application/protobuf"
+    //  * dataschema: set with the type's URL. See https://developers.google.com/protocol-buffers/docs/proto3#any
+    //  * subject: Depends on the type of the event: Workflow execution's urn for workflow's event and
+    //             urn#node-id for node and task events.
+
+    map<string, CloudEventAttributeValue> attributes = 5;
+
+    // -- CloudEvent Data. Only use the proto for the payload
+    oneof  data {
+        bytes binary_data = 6;
+        string text_data = 7;
+        google.protobuf.Any proto_data = 8;
+    }
+
+    /**
+     * The CloudEvent specification defines
+     * seven attribute value types...
+     */
+
+    message CloudEventAttributeValue {
+
+        oneof attr {
+            bool ce_boolean = 1;
+            int32 ce_integer = 2;
+            string ce_string = 3;
+            bytes ce_bytes = 4;
+            string ce_uri = 5;
+            string ce_uri_ref = 6;
+            google.protobuf.Timestamp ce_timestamp = 7;
+        }
+    }
+}
